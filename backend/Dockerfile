@@ -8,6 +8,10 @@ RUN npm install
 COPY . .
 RUN npx prisma generate
 
+# Make startup script executable
+RUN chmod +x start.sh
+
 EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+# Automatically runs migrations then starts the server
+CMD ["sh", "start.sh"]
