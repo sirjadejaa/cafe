@@ -39,9 +39,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-6">
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--primary)] rounded-full blur-[150px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--secondary)] rounded-full blur-[150px]" />
+      <div className="absolute inset-0 z-0 opacity-25 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 md:w-96 md:h-96 bg-[var(--primary)] rounded-full blur-[80px] md:blur-[150px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 md:w-96 md:h-96 bg-[var(--secondary)] rounded-full blur-[80px] md:blur-[150px]" />
       </div>
 
       <motion.div 
