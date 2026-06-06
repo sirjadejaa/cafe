@@ -3,7 +3,7 @@ import prisma from '../config/db';
 
 export const createReservation = async (req: any, res: Response) => {
   try {
-    const { date, time, guests, locationPref, specialRequests } = req.body;
+    const { date, time, guests, location, locationPref, specialRequests } = req.body;
     const userId = req.user.id;
 
     const reservation = await prisma.reservation.create({
@@ -12,7 +12,7 @@ export const createReservation = async (req: any, res: Response) => {
         date: new Date(date),
         time,
         guests,
-        locationPref,
+        locationPref: locationPref || location || 'INDOOR',
         specialRequests,
       },
     });
