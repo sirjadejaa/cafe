@@ -4,6 +4,13 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
+  // Check if data already exists
+  const categoryCount = await prisma.category.count();
+  if (categoryCount > 0) {
+    console.log('Database already seeded. Skipping seed.');
+    return;
+  }
+
   // Clear existing data
   await prisma.review.deleteMany();
   await prisma.cartItem.deleteMany();
