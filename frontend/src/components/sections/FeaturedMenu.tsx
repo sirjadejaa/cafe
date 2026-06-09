@@ -7,6 +7,39 @@ import { Loader2 } from 'lucide-react';
 
 import Link from 'next/link';
 
+const MOCK_ITEMS = [
+  { 
+    id: '1', 
+    name: 'Artisan Espresso', 
+    slug: 'artisan-espresso', 
+    price: 4.5, 
+    description: 'A triple-shot of our signature high-altitude dark roast Arabica beans, featuring a deep body, heavy velvet crema, and soft notes of dark cocoa and honey.', 
+    images: ['https://images.unsplash.com/photo-151097252790b-af4f90dbf97d?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 4.9,
+    category: { name: 'Coffee', slug: 'coffee' }
+  },
+  { 
+    id: '2', 
+    name: 'Truffle Burger', 
+    slug: 'truffle-burger', 
+    price: 18.0, 
+    description: 'A premium chef-selected 8oz Wagyu beef patty, grilled over cedar embers, layered with house-made black winter truffle aioli, melted aged cave Gruyère, and caramelized shallots on a toasted gold-leaf brioche bun.', 
+    images: ['https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 4.8,
+    category: { name: 'Burgers', slug: 'burgers' }
+  },
+  { 
+    id: '3', 
+    name: 'Gold Leaf Pasta', 
+    slug: 'gold-leaf-pasta', 
+    price: 24.0, 
+    description: 'Exquisite hand-rolled yolk pappardelle pasta tossed in a luxurious Iranian saffron cream reduction, garnished with freshly grated Pecorino Romano and delicate sheets of 24-karat edible gold leaf.', 
+    images: ['https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 5.0,
+    category: { name: 'Main Course', slug: 'main-course' }
+  }
+];
+
 export default function FeaturedMenu() {
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +50,8 @@ export default function FeaturedMenu() {
         const response = await api.get('/menu');
         setItems(response.data.slice(0, 3));
       } catch (error) {
-        console.error('Failed to fetch featured menu:', error);
+        console.error('Failed to fetch featured menu, using mock items:', error);
+        setItems(MOCK_ITEMS);
       } finally {
         setIsLoading(false);
       }

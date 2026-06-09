@@ -58,24 +58,76 @@ const MOCK_ITEMS = [
     category: { name: 'Desserts', slug: 'desserts' } 
   }
 ];
+// In-memory cache for menu items
+let menuItemsCache: any[] | null = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 300000; // 5 minutes cache
+
+// Cache for individual menu items by slug
+const menuItemDetailsCache = new Map<string, { data: any; timestamp: number }>();
+
+export const invalidateMenuCache = () => {
+  menuItemsCache = null;
+  lastCacheTime = 0;
+  menuItemDetailsCache.clear();
+  console.log('Menu caches invalidated successfully.');
+};
+
+export const preWarmMenuCache = async () => {
+  try {
+    console.log('Pre-warming menu items cache...');
+    const items = await prisma.menuItem.findMany({
+      where: { isAvailable: true },
+      include: { category: true },
+    });
+    menuItemsCache = items;
+    lastCacheTime = Date.now();
+    console.log(`Pre-warmed menu items cache with ${items.length} items.`);
+  } catch (error: any) {
+    console.error('Failed to pre-warm menu items cache:', error.message);
+  }
+};
 
 export const getMenuItems = async (req: Request, res: Response) => {
   try {
     const { category, search } = req.query;
-    
-    const query: any = {
-      where: { isAvailable: true },
-      include: { category: true },
-    };
+    const now = Date.now();
+    let items: any[];
 
-    if (category) {
-      query.where.category = { slug: category as string };
+    if (menuItemsCache && (now - lastCacheTime < CACHE_TTL)) {
+      items = menuItemsCache;
+    } else {
+      console.log('Fetching menu items from database...');
+      items = await prisma.menuItem.findMany({
+        where: { isAvailable: true },
+        include: { category: true },
+      });
+      menuItemsCache = items;
+      lastCacheTime = now;
     }
 
-    const items = await prisma.menuItem.findMany(query);
-    res.status(200).json(items);
+    // Filter in-memory to keep response speeds fast
+    let filteredItems = items;
+    if (category) {
+      filteredItems = filteredItems.filter(item => {
+        const itemCatSlug = typeof item.category === 'object' && item.category !== null
+          ? item.category.slug
+          : item.categorySlug || '';
+        return itemCatSlug.toLowerCase() === (category as string).toLowerCase();
+      });
+    }
+
+    if (search) {
+      const searchLower = (search as string).toLowerCase();
+      filteredItems = filteredItems.filter(item => 
+        item.name.toLowerCase().includes(searchLower) || 
+        (item.description && item.description.toLowerCase().includes(searchLower))
+      );
+    }
+
+    res.status(200).json(filteredItems);
   } catch (error: any) {
-    console.error('Database connection failed, returning mock data');
+    console.error('Database connection failed, returning mock data:', error.message);
     res.status(200).json(MOCK_ITEMS);
   }
 };
@@ -86,6 +138,13 @@ export const getMenuItemBySlug = async (req: Request, res: Response) => {
     if (!slug) {
       return res.status(400).json({ message: 'Invalid slug parameter' });
     }
+
+    const now = Date.now();
+    const cached = menuItemDetailsCache.get(slug);
+    if (cached && (now - cached.timestamp < CACHE_TTL)) {
+      return res.status(200).json(cached.data);
+    }
+
     const item = await prisma.menuItem.findUnique({
       where: { slug },
       include: {
@@ -104,9 +163,16 @@ export const getMenuItemBySlug = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Menu item not found' });
     }
 
+    menuItemDetailsCache.set(slug, { data: item, timestamp: now });
     res.status(200).json(item);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    console.error('Failed to fetch item by slug from DB, falling back to mock data:', error.message);
+    const matched = MOCK_ITEMS.find(i => i.slug === req.params.slug);
+    if (matched) {
+      res.status(200).json(matched);
+    } else {
+      res.status(500).json({ message: error.message });
+    }
   }
 };
 
@@ -127,6 +193,7 @@ export const createMenuItem = async (req: Request, res: Response) => {
       },
     });
 
+    invalidateMenuCache();
     res.status(201).json(item);
   } catch (error: any) {
     console.error('Database connection failed, simulating successful creation');
@@ -159,6 +226,7 @@ export const updateMenuItem = async (req: Request, res: Response) => {
       where: { id },
       data: req.body,
     });
+    invalidateMenuCache();
     res.status(200).json(item);
   } catch (error: any) {
     console.error('Database connection failed, simulating successful update');
@@ -180,9 +248,33 @@ export const deleteMenuItem = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid ID parameter' });
     }
     await prisma.menuItem.delete({ where: { id } });
+    invalidateMenuCache();
     res.status(204).send();
   } catch (error: any) {
     console.error('Database connection failed, simulating successful delete');
+    invalidateMenuCache();
     res.status(200).json({ message: 'Item deleted successfully', id });
   }
 };
+
+export const getCategories = async (req: Request, res: Response) => {
+  try {
+    const categories = await prisma.category.findMany({
+      orderBy: { name: 'asc' }
+    });
+    res.status(200).json(categories);
+  } catch (error: any) {
+    console.error('Database connection failed, returning mock categories:', error.message);
+    const mockCategories = [
+      { id: 'coffee', name: 'Coffee', slug: 'coffee' },
+      { id: 'pizza', name: 'Pizza', slug: 'pizza' },
+      { id: 'burgers', name: 'Burgers', slug: 'burgers' },
+      { id: 'desserts', name: 'Desserts', slug: 'desserts' },
+      { id: 'drinks', name: 'Drinks', slug: 'drinks' },
+      { id: 'main-course', name: 'Main Course', slug: 'main-course' }
+    ];
+    res.status(200).json(mockCategories);
+  }
+};
+
+

@@ -15,8 +15,14 @@ export const createOrder = async (req: any, res: Response) => {
     const orderItemsData = [];
 
     try {
+      const itemIds = items.map((item: any) => item.id);
+      const menuItems = await prisma.menuItem.findMany({
+        where: { id: { in: itemIds } }
+      });
+      const menuItemsMap = new Map(menuItems.map(mi => [mi.id, mi]));
+
       for (const item of items) {
-        const menuItem = await prisma.menuItem.findUnique({ where: { id: item.id } });
+        const menuItem = menuItemsMap.get(item.id);
         if (!menuItem) continue;
         
         subtotal += menuItem.price * item.quantity;

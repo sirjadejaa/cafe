@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { getMenuItems, getMenuItemBySlug, createMenuItem, updateMenuItem, deleteMenuItem } from '../controllers/menu.controller';
+import { getMenuItems, getMenuItemBySlug, createMenuItem, updateMenuItem, deleteMenuItem, getCategories } from '../controllers/menu.controller';
 import { protect, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
 
+router.get('/categories', getCategories);
 router.get('/', getMenuItems);
 router.get('/:slug', getMenuItemBySlug);
 router.post('/', protect, authorize('ADMIN'), createMenuItem);

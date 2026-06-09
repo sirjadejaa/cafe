@@ -1,11 +1,11 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { CoffeeCup } from '../3d/CoffeeCup';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 
 import Link from 'next/link';
 
@@ -25,12 +25,15 @@ export default function Hero() {
       {/* 3D Canvas Background */}
       <div className="absolute inset-0 z-0">
         <Canvas shadows>
-          <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
-          <Environment preset="city" />
-          <ambientLight intensity={0.5} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-          <CoffeeCup />
-          {/* <OrbitControls enableZoom={false} /> */}
+          <Suspense fallback={null}>
+            <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+            <ambientLight intensity={0.7} />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
+            <directionalLight position={[-5, 5, 2]} intensity={0.8} />
+            <pointLight position={[0, 3, -2]} intensity={0.5} />
+            <CoffeeCup />
+            {/* <OrbitControls enableZoom={false} /> */}
+          </Suspense>
         </Canvas>
       </div>
 

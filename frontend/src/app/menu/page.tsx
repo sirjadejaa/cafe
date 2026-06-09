@@ -7,6 +7,59 @@ import api from '@/lib/api';
 
 const CATEGORIES = ['All', 'Coffee', 'Pizza', 'Burgers', 'Desserts', 'Drinks', 'Main Course'];
 
+const MOCK_ITEMS = [
+  { 
+    id: '1', 
+    name: 'Artisan Espresso', 
+    slug: 'artisan-espresso', 
+    price: 4.5, 
+    description: 'A triple-shot of our signature high-altitude dark roast Arabica beans, featuring a deep body, heavy velvet crema, and soft notes of dark cocoa and honey.', 
+    images: ['https://images.unsplash.com/photo-151097252790b-af4f90dbf97d?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 4.9,
+    category: { name: 'Coffee', slug: 'coffee' }
+  },
+  { 
+    id: '2', 
+    name: 'Truffle Burger', 
+    slug: 'truffle-burger', 
+    price: 18.0, 
+    description: 'A premium chef-selected 8oz Wagyu beef patty, grilled over cedar embers, layered with house-made black winter truffle aioli, melted aged cave Gruyère, and caramelized shallots on a toasted gold-leaf brioche bun.', 
+    images: ['https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 4.8,
+    category: { name: 'Burgers', slug: 'burgers' }
+  },
+  { 
+    id: '3', 
+    name: 'Gold Leaf Pasta', 
+    slug: 'gold-leaf-pasta', 
+    price: 24.0, 
+    description: 'Exquisite hand-rolled yolk pappardelle pasta tossed in a luxurious Iranian saffron cream reduction, garnished with freshly grated Pecorino Romano and delicate sheets of 24-karat edible gold leaf.', 
+    images: ['https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 5.0,
+    category: { name: 'Main Course', slug: 'main-course' }
+  },
+  { 
+    id: '4', 
+    name: 'Panama Gesha Cold Brew', 
+    slug: 'panama-gesha-cold-brew', 
+    price: 9.0, 
+    description: 'An elite single-origin Panama Gesha cold brew coffee, cold-steeped over crystal ice filters for 24 hours. Possesses an aromatic clarity of jasmine, white peach, and orange blossom.', 
+    images: ['https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 4.9,
+    category: { name: 'Coffee', slug: 'coffee' }
+  },
+  { 
+    id: '5', 
+    name: 'Gold Chocolate Lava', 
+    slug: 'gold-chocolate-lava', 
+    price: 14.5, 
+    description: 'A decadent molten lava cake crafted from 70% single-origin Venezuelan dark chocolate, with a soft flowing core, topped with Madagascar vanilla bean gelato and finished with gold leaf flakes.', 
+    images: ['https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800'], 
+    ratings: 5.0,
+    category: { name: 'Desserts', slug: 'desserts' }
+  }
+];
+
 export default function MenuPage() {
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +72,8 @@ export default function MenuPage() {
         const response = await api.get('/menu');
         setItems(response.data);
       } catch (error) {
-        console.error('Failed to fetch menu:', error);
+        console.error('Failed to fetch menu, using mock items:', error);
+        setItems(MOCK_ITEMS);
       } finally {
         setIsLoading(false);
       }

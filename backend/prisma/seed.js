@@ -4,13 +4,6 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Check if data already exists
-  const categoryCount = await prisma.category.count();
-  if (categoryCount > 0) {
-    console.log('Database already seeded. Skipping seed.');
-    return;
-  }
-
   // Clear existing data
   await prisma.review.deleteMany();
   await prisma.cartItem.deleteMany();
@@ -62,9 +55,11 @@ async function main() {
 
   // Create Categories
   const coffee = await prisma.category.create({ data: { name: 'Coffee', slug: 'coffee' } });
+  const pizza = await prisma.category.create({ data: { name: 'Pizza', slug: 'pizza' } });
   const burgers = await prisma.category.create({ data: { name: 'Burgers', slug: 'burgers' } });
-  const mainCourse = await prisma.category.create({ data: { name: 'Main Course', slug: 'main-course' } });
   const desserts = await prisma.category.create({ data: { name: 'Desserts', slug: 'desserts' } });
+  const drinks = await prisma.category.create({ data: { name: 'Drinks', slug: 'drinks' } });
+  const mainCourse = await prisma.category.create({ data: { name: 'Main Course', slug: 'main-course' } });
 
   // Create Menu Items
   await prisma.menuItem.createMany({

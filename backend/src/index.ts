@@ -4,8 +4,17 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import apiRoutes from './routes';
 import prisma from './config/db';
+import { preWarmMenuCache } from './controllers/menu.controller';
 
 dotenv.config();
+
+// Pre-heat Prisma client connection to prevent cold starts on first user request
+prisma.$connect()
+  .then(() => {
+    console.log('Successfully connected to the database.');
+    preWarmMenuCache();
+  })
+  .catch((err) => console.error('Error pre-connecting to the database:', err));
 
 const app = express();
 const PORT = process.env.PORT || 5000;
